@@ -1,25 +1,68 @@
-{% extends 'base.html' %} {% block title %}Список товаров{% endblock %} {% block content %}
+{% extends 'base.html' %}
+
+{% block title %}Список товаров{% endblock %}
+
+{% block content %}
 <h1 class="text-3xl font-bold mb-8">Список товаров</h1>
+
+<!-- Форма фильтрации и сортировки -->
+<form method="GET" class="mb-6 flex flex-wrap gap-4 items-end">
+  <!-- Фильтр по категориям -->
+  <div>
+    <label for="category" class="block text-gray-700">Категория</label>
+    <select name="category" id="category" class="border rounded p-2">
+      <option value="">Все</option>
+      {% for category in categories %}
+      <option value="{{ category.id }}" {% if category.id|stringformat:"s" == selected_category %}selected{% endif %}>
+        {{ category.name }}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- Фильтр по брендам -->
+  <div>
+    <label for="brand" class="block text-gray-700">Бренд</label>
+    <select name="brand" id="brand" class="border rounded p-2">
+      <option value="">Все</option>
+      {% for brand in brands %}
+      <option value="{{ brand.id }}" {% if brand.id|stringformat:"s" == selected_brand %}selected{% endif %}>
+        {{ brand.name }}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- Сортировка -->
+  <div>
+    <label for="sort" class="block text-gray-700">Сортировка</label>
+    <select name="sort" id="sort" class="border rounded p-2">
+      <option value="default_price" {% if sort_by == "default_price" %}selected{% endif %}>По цене (возрастание)</option>
+      <option value="-default_price" {% if sort_by == "-default_price" %}selected{% endif %}>По цене (убывание)</option>
+      <option value="created_at" {% if sort_by == "created_at" %}selected{% endif %}>По дате (старые)</option>
+      <option value="-created_at" {% if sort_by == "-created_at" %}selected{% endif %}>По дате (новые)</option>
+    </select>
+  </div>
+
+  <!-- Кнопка фильтрации -->
+  <button type="submit" class="px-4 py-2 bg-black text-white rounded">Применить</button>
+</form>
 
 <!-- Список товаров -->
 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
   {% for product in products %}
   <div class="bg-white p-4 rounded-lg shadow-md">
-    <!-- Ссылка на страницу продукта -->
     <a href="{% url 'product_detail' product.slug %}">
-      <img
-        src="{{ product.photo }}"
-        alt="{{ product.name }}"
-        class="w-full h-48 object-cover rounded-lg"
-      />
+      <img src="{{ product.photo }}" alt="{{ product.name }}" class="w-full h-48 object-cover rounded-lg" />
     </a>
-    <!-- Ссылка на страницу продукта для названия -->
     <a href="{% url 'product_detail' product.slug %}">
       <h3 class="text-xl font-semibold mt-4 hover:text-gray-700">{{ product.name }}</h3>
     </a>
     <p class="text-gray-600">{{ product.description|truncatechars:50 }}</p>
     <p class="text-lg font-bold mt-2">{{ product.default_price }} руб.</p>
   </div>
+  {% empty %}
+  <p class="col-span-full text-center text-gray-600">Товары не найдены.</p>
   {% endfor %}
 </div>
 
@@ -27,14 +70,8 @@
 <div class="mt-8 flex justify-center">
   <nav class="inline-flex rounded-md shadow-sm">
     {% if products.has_previous %}
-    <a href="?page=1" class="px-4 py-2 border rounded-l-md bg-white text-gray-700 hover:bg-gray-50"
-      >Первая</a
-    >
-    <a
-      href="?page={{ products.previous_page_number }}"
-      class="px-4 py-2 border bg-white text-gray-700 hover:bg-gray-50"
-      >Назад</a
-    >
+    <a href="?page=1" class="px-4 py-2 border rounded-l-md bg-white text-gray-700 hover:bg-gray-50">Первая</a>
+    <a href="?page={{ products.previous_page_number }}" class="px-4 py-2 border bg-white text-gray-700 hover:bg-gray-50">Назад</a>
     {% endif %}
 
     <span class="px-4 py-2 border bg-white text-gray-700">
@@ -42,17 +79,10 @@
     </span>
 
     {% if products.has_next %}
-    <a
-      href="?page={{ products.next_page_number }}"
-      class="px-4 py-2 border bg-white text-gray-700 hover:bg-gray-50"
-      >Вперед</a
-    >
-    <a
-      href="?page={{ products.paginator.num_pages }}"
-      class="px-4 py-2 border rounded-r-md bg-white text-gray-700 hover:bg-gray-50"
-      >Последняя</a
-    >
+    <a href="?page={{ products.next_page_number }}" class="px-4 py-2 border bg-white text-gray-700 hover:bg-gray-50">Вперед</a>
+    <a href="?page={{ products.paginator.num_pages }}" class="px-4 py-2 border rounded-r-md bg-white text-gray-700 hover:bg-gray-50">Последняя</a>
     {% endif %}
   </nav>
 </div>
+
 {% endblock %}
