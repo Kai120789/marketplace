@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Список товаров</title>
+    <style>
+      .product-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 20px;
+      }
+      .product-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        width: 200px;
+        text-align: center;
+      }
+      .product-card img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+      }
+      .product-card h3 {
+        font-size: 18px;
+        margin: 10px 0;
+      }
+      .product-card p {
+        font-size: 14px;
+        color: #555;
+      }
+      .product-card .price {
+        font-size: 16px;
+        font-weight: bold;
+        color: #000;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Список товаров</h1>
+    <div class="product-list">
+      {% for product in products %}
+      <div class="product-card">
+        <img src="{{ product.photo.url }}" alt="{{ product.name }}" />
+        <h3>{{ product.name }}</h3>
+        <p>{{ product.description }}</p>
+        <p class="price">{{ product.default_price }} руб.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </body>
+</html>
