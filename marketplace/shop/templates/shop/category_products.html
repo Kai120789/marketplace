@@ -1,5 +1,5 @@
-{% extends 'base.html' %} {% block title %}Список товаров{% endblock %} {% block content %}
-<h1 class="text-3xl font-bold mb-8">Список товаров</h1>
+{% extends "base.html" %} {% block title %} {{ category.name }}{% endblock %} {% block content %}
+<h1 class="text-3xl font-bold mb-8">Товары в категории: {{ category.name }}</h1>
 
 <!-- Список товаров -->
 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -8,7 +8,7 @@
     <!-- Ссылка на страницу продукта -->
     <a href="{% url 'product_detail' product.slug %}">
       <img
-        src="{{ product.photo }}"
+        src="{{ product.photo.url }}"
         alt="{{ product.name }}"
         class="w-full h-48 object-cover rounded-lg"
       />
@@ -20,6 +20,8 @@
     <p class="text-gray-600">{{ product.description|truncatechars:50 }}</p>
     <p class="text-lg font-bold mt-2">{{ product.default_price }} руб.</p>
   </div>
+  {% empty %}
+  <p class="text-gray-500">В этой категории пока нет товаров.</p>
   {% endfor %}
 </div>
 
@@ -27,14 +29,15 @@
 <div class="mt-8 flex justify-center">
   <nav class="inline-flex rounded-md shadow-sm">
     {% if products.has_previous %}
-    <a href="?page=1" class="px-4 py-2 border rounded-l-md bg-white text-gray-700 hover:bg-gray-50"
-      >Первая</a
-    >
+    <a href="?page=1" class="px-4 py-2 border rounded-l-md bg-white text-gray-700 hover:bg-gray-50">
+      Первая
+    </a>
     <a
       href="?page={{ products.previous_page_number }}"
       class="px-4 py-2 border bg-white text-gray-700 hover:bg-gray-50"
-      >Назад</a
     >
+      Назад
+    </a>
     {% endif %}
 
     <span class="px-4 py-2 border bg-white text-gray-700">
@@ -45,13 +48,15 @@
     <a
       href="?page={{ products.next_page_number }}"
       class="px-4 py-2 border bg-white text-gray-700 hover:bg-gray-50"
-      >Вперед</a
     >
+      Вперед
+    </a>
     <a
       href="?page={{ products.paginator.num_pages }}"
       class="px-4 py-2 border rounded-r-md bg-white text-gray-700 hover:bg-gray-50"
-      >Последняя</a
     >
+      Последняя
+    </a>
     {% endif %}
   </nav>
 </div>

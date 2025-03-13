@@ -71,7 +71,7 @@ class Command(BaseCommand):
         self.create_brands()
         self.create_products(50)
         self.create_colors()
-        self.create_product_variants(100)
+        self.create_product_variants()
         self.create_product_colors()
         self.create_reviews(200)
         self.create_baskets(50)
@@ -156,27 +156,29 @@ class Command(BaseCommand):
                 image='colors/default.jpg'  # Убедитесь, что у вас есть дефолтное изображение
             )
 
-    def create_product_variants(self, number):
+    def create_product_variants(self):
         products = list(Product.objects.all())
         colors = list(Color.objects.all())
-        for _ in range(number):
-            product = random.choice(products)
-            color = random.choice(colors)
-            variant_name = f"{product.name} ({color.name})"
-            variant_description = f"Вариант {product.name} в цвете {color.name}. {product.description}"
+        for product in products:
+            num_variants = random.randint(2, 4)  # Создаём от 2 до 4 вариаций для каждого продукта
+            for i in range(num_variants):
+                color = random.choice(colors)
+                variant_name = f"{product.name} ({color.name})"
+                variant_description = f"Вариант {product.name} в цвете {color.name}. {product.description}"
+                
+                ProductVariant.objects.create(
+                    name=variant_name,
+                    photo='variants/default.jpg',  # Убедитесь, что у вас есть дефолтное изображение
+                    product=product,
+                    slug=f"{product.slug}-{i+1}",  # Добавляем индекс для уникальности
+                    color=color,
+                    category=product.category,
+                    description=variant_description,
+                    images={'images': [fake.image_url() for _ in range(random.randint(1, 5))]},
+                    brand=product.brand,
+                    price=random.uniform(1000.0, 10000.0)
+                )
 
-            ProductVariant.objects.create(
-                name=variant_name,
-                photo='variants/default.jpg',  # Убедитесь, что у вас есть дефолтное изображение
-                product=product,
-                slug=fake.unique.slug(),
-                color=color,
-                category=product.category,
-                description=variant_description,
-                images={'images': fake.image_url() for _ in range(random.randint(1, 5))},
-                brand=product.brand,
-                price=random.uniform(1000.0, 10000.0)
-            )
 
     def create_product_colors(self):
         products = list(Product.objects.all())
