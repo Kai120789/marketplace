@@ -1,0 +1,61 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Магазин уличной одежды{% endblock %}</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .header,
+      .footer {
+        background-color: #1a1a1a;
+        color: white;
+      }
+      .header a,
+      .footer a {
+        color: white;
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+      .header a:hover,
+      .footer a:hover {
+        color: #fbbf24;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <header class="header py-4">
+      <div class="container mx-auto flex justify-between items-center px-4">
+        <div class="flex items-center space-x-2">
+          <img src="{% static 'shop/icon.png' %}" alt="icon" class="w-12 h-12 rounded-full" />
+          <a href="/shop" class="text-2xl font-bold">StreetWear RUSSKIY</a>
+        </div>
+        <nav>
+          <ul class="flex space-x-6">
+            <li><a href="/shop">Главная</a></li>
+            <li><a href="/shop/products/">Товары</a></li>
+            <li><a href="#">Бренды</a></li>
+            <li><a href="#">Контакты</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">{% block content %}{% endblock %}</main>
+
+    <footer class="footer py-6 mt-8">
+      <div class="container mx-auto text-center">
+        <p>&copy; 2025 StreetWear. Все права защищены.</p>
+        <p>
+          Следите за нами в <a href="#" class="underline">Instagram</a> и
+          <a href="#" class="underline">Telegram</a>.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

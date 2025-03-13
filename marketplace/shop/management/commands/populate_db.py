@@ -139,7 +139,7 @@ class Command(BaseCommand):
 
             Product.objects.create(
                 name=product_name,
-                photo='products/default.jpg',  # Убедитесь, что у вас есть дефолтное изображение
+                photo='https://aristocratlondon.co.uk/cdn/shop/files/b_d3c3768a-fcd7-4d2a-b04d-22a24974174c.jpg?v=1698671595&width=1440',  # Убедитесь, что у вас есть дефолтное изображение
                 slug=fake.unique.slug(),
                 avg_rating=random.uniform(1.0, 5.0),
                 category=category,

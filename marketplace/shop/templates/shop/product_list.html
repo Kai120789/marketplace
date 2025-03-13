@@ -1,54 +1,52 @@
-<!DOCTYPE html>
-<html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Список товаров</title>
-    <style>
-      .product-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        padding: 20px;
-      }
-      .product-card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 15px;
-        width: 200px;
-        text-align: center;
-      }
-      .product-card img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 8px;
-      }
-      .product-card h3 {
-        font-size: 18px;
-        margin: 10px 0;
-      }
-      .product-card p {
-        font-size: 14px;
-        color: #555;
-      }
-      .product-card .price {
-        font-size: 16px;
-        font-weight: bold;
-        color: #000;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Список товаров</h1>
-    <div class="product-list">
-      {% for product in products %}
-      <div class="product-card">
-        <img src="{{ product.photo.url }}" alt="{{ product.name }}" />
-        <h3>{{ product.name }}</h3>
-        <p>{{ product.description }}</p>
-        <p class="price">{{ product.default_price }} руб.</p>
-      </div>
-      {% endfor %}
-    </div>
-  </body>
-</html>
+{% extends 'base.html' %} {% block title %}Список товаров{% endblock %} {% block content %}
+<h1 class="text-3xl font-bold mb-8">Список товаров</h1>
+
+<!-- Список товаров -->
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+  {% for product in products %}
+  <div class="bg-white p-4 rounded-lg shadow-md">
+    <img
+      src="{{ product.photo }}"
+      alt="{{ product.name }}"
+      class="w-full h-48 object-cover rounded-lg"
+    />
+    <h3 class="text-xl font-semibold mt-4">{{ product.name }}</h3>
+    <p class="text-gray-600">{{ product.description|truncatechars:50 }}</p>
+    <p class="text-lg font-bold mt-2">{{ product.default_price }} руб.</p>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Пагинация -->
+<div class="mt-8 flex justify-center">
+  <nav class="inline-flex rounded-md shadow-sm">
+    {% if products.has_previous %}
+    <a href="?page=1" class="px-4 py-2 border rounded-l-md bg-white text-gray-700 hover:bg-gray-50"
+      >Первая</a
+    >
+    <a
+      href="?page={{ products.previous_page_number }}"
+      class="px-4 py-2 border bg-white text-gray-700 hover:bg-gray-50"
+      >Назад</a
+    >
+    {% endif %}
+
+    <span class="px-4 py-2 border bg-white text-gray-700">
+      Страница {{ products.number }} из {{ products.paginator.num_pages }}
+    </span>
+
+    {% if products.has_next %}
+    <a
+      href="?page={{ products.next_page_number }}"
+      class="px-4 py-2 border bg-white text-gray-700 hover:bg-gray-50"
+      >Вперед</a
+    >
+    <a
+      href="?page={{ products.paginator.num_pages }}"
+      class="px-4 py-2 border rounded-r-md bg-white text-gray-700 hover:bg-gray-50"
+      >Последняя</a
+    >
+    {% endif %}
+  </nav>
+</div>
+{% endblock %}
