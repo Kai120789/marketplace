@@ -11,6 +11,10 @@ def product_list(request):
 
     return render(request, 'shop/product_list.html', {'products': products})
 
+def brand_list(request):
+    brands = Brand.objects.all()
+    return render(request, 'shop/brand_list.html', {'brands': brands})
+
 def index(request):
     products = Product.objects.all()[:4]
     brands = Brand.objects.all()[:6]

@@ -113,7 +113,7 @@ class Command(BaseCommand):
         for brand_name, brand_description in BRANDS.items():
             Brand.objects.create(
                 name=brand_name,
-                photo='brands/default.jpg',  # Убедитесь, что у вас есть дефолтное изображение
+                photo='https://cdn.thebrandingjournal.com/wp-content/uploads/2019/05/chanel_logo_the_branding_journal.jpg.webp',
                 description=brand_description
             )
 
