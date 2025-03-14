@@ -1,0 +1,76 @@
+{% extends "base.html" %} {% block content %}
+<div class="flex items-center justify-center bg-gray-100 py-8">
+  <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+    <h2 class="text-2xl font-bold mb-6 text-center">Регистрация</h2>
+
+    <!-- Сообщения об ошибках -->
+    {% if messages %} {% for message in messages %}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {{ message }}
+    </div>
+    {% endfor %} {% endif %}
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+
+      <!-- Поле для имени пользователя -->
+      <div>
+        <label for="username" class="block text-sm font-medium text-gray-700"
+          >Имя пользователя</label
+        >
+        <input
+          type="text"
+          name="username"
+          id="username"
+          required
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        />
+      </div>
+
+      <!-- Поле для email -->
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+        <input
+          type="email"
+          name="email"
+          id="email"
+          required
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        />
+      </div>
+
+      <!-- Поле для пароля -->
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">Пароль</label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          required
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        />
+      </div>
+
+      <!-- Кнопка регистрации -->
+      <div>
+        <button
+          type="submit"
+          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Зарегистрироваться
+        </button>
+      </div>
+    </form>
+
+    <!-- Ссылка на вход -->
+    <div class="mt-4 text-center">
+      <p class="text-sm text-gray-600">
+        Уже есть аккаунт?
+        <a href="{% url 'login' %}" class="font-medium text-indigo-600 hover:text-indigo-500">
+          Войти
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

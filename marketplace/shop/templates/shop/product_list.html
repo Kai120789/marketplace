@@ -5,9 +5,7 @@
 {% block content %}
 <h1 class="text-3xl font-bold mb-8">Список товаров</h1>
 
-<!-- Форма фильтрации и сортировки -->
 <form method="GET" class="mb-6 flex flex-wrap gap-4 items-end">
-  <!-- Фильтр по категориям -->
   <div>
     <label for="category" class="block text-gray-700">Категория</label>
     <select name="category" id="category" class="border rounded p-2">
@@ -20,7 +18,6 @@
     </select>
   </div>
 
-  <!-- Фильтр по брендам -->
   <div>
     <label for="brand" class="block text-gray-700">Бренд</label>
     <select name="brand" id="brand" class="border rounded p-2">
@@ -33,7 +30,6 @@
     </select>
   </div>
 
-  <!-- Сортировка -->
   <div>
     <label for="sort" class="block text-gray-700">Сортировка</label>
     <select name="sort" id="sort" class="border rounded p-2">
@@ -44,11 +40,9 @@
     </select>
   </div>
 
-  <!-- Кнопка фильтрации -->
   <button type="submit" class="px-4 py-2 bg-black text-white rounded">Применить</button>
 </form>
 
-<!-- Список товаров -->
 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
   {% for product in products %}
   <div class="bg-white p-4 rounded-lg shadow-md">
@@ -66,7 +60,6 @@
   {% endfor %}
 </div>
 
-<!-- Пагинация -->
 <div class="mt-8 flex justify-center">
   <nav class="inline-flex rounded-md shadow-sm">
     {% if products.has_previous %}

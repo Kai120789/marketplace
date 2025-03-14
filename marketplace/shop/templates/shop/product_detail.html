@@ -1,7 +1,6 @@
 {% extends 'base.html' %} {% load static %} {% block title %}{{ product_variant.name }} - StreetWear
 RUSSKIY{% endblock %} {% block content %}
 <div class="container mx-auto px-4 py-8">
-  <!-- Хлебные крошки -->
   <nav class="flex mb-6" aria-label="Breadcrumb">
     <ol class="inline-flex items-center space-x-1 md:space-x-3">
       <li class="inline-flex items-center">
@@ -48,46 +47,35 @@ RUSSKIY{% endblock %} {% block content %}
     </ol>
   </nav>
 
-  <!-- Основная информация о товаре -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-    <!-- Изображения товара -->
     <div class="space-y-4">
       <div class="bg-white p-4 rounded-lg shadow-md">
         <img
-          src="{{ product_variant.photo.url }}"
+          src="{{ product_variant.photo }}"
           alt="{{ product_variant.name }}"
           class="w-full h-auto rounded-lg"
         />
       </div>
-      <!-- Дополнительные изображения (если есть) -->
-      <div class="grid grid-cols-3 gap-4">
-        {% for image in product_variant.images %}
-        <div class="bg-white p-2 rounded-lg shadow-md">
-          <img
-            src="{{ image }}"
-            alt="{{ product_variant.name }}"
-            class="w-full h-auto rounded-lg"
-          />
+      <div class="flex space-x-2">
+        {% for image in product_variant.images.images %}
+        <div class="bg-white p-2 rounded-lg shadow-md flex-shrink-0">
+          <img src="{{ image }}" alt="{{ product_variant.name }}" class="w-24 h-24 rounded-lg" />
         </div>
         {% endfor %}
       </div>
     </div>
 
-    <!-- Описание товара -->
-    <div class="bg-white p-6 rounded-lg shadow-md">
-      <h1 class="text-3xl font-bold mb-4">{{ product_variant.name }}</h1>
-      <p class="text-gray-600 mb-4">{{ product_variant.description }}</p>
+    <div class="bg-white p-5 rounded-lg shadow-md">
+      <h1 class="text-3xl font-bold mb-10">{{ product_variant.name }}</h1>
+      <p class="text-gray-600 mb-10">{{ product_variant.description }}</p>
 
-      <!-- Рейтинг -->
-      <div class="flex items-center mb-4">
+      <div class="flex items-center mb-10">
         <span class="text-yellow-400 text-2xl">★★★★★</span>
         <span class="ml-2 text-gray-600">({{ product_variant.product.avg_rating }})</span>
       </div>
 
-      <!-- Цена -->
-      <p class="text-2xl font-bold mb-4">{{ product_variant.price }} руб.</p>
+      <p class="text-2xl font-bold mb-10">{{ product_variant.price }} руб.</p>
 
-      <!-- Кнопки добавления в корзину -->
       <div class="flex space-x-4">
         <button
           class="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors"
@@ -101,7 +89,6 @@ RUSSKIY{% endblock %} {% block content %}
         </button>
       </div>
 
-      <!-- Доступные вариации -->
       <div class="mt-6">
         <h2 class="text-xl font-semibold mb-2">Выберите вариант:</h2>
         <div class="flex flex-wrap gap-2">
@@ -116,7 +103,6 @@ RUSSKIY{% endblock %} {% block content %}
         </div>
       </div>
 
-      <!-- Дополнительная информация -->
       <div class="mt-6">
         <h2 class="text-xl font-semibold mb-2">Детали товара</h2>
         <ul class="text-gray-600">
@@ -128,7 +114,6 @@ RUSSKIY{% endblock %} {% block content %}
     </div>
   </div>
 
-  <!-- Отзывы -->
   <div class="mt-12">
     <h2 class="text-2xl font-bold mb-6">Отзывы</h2>
     <div class="space-y-4">

@@ -1,7 +1,11 @@
 from django.core.management.base import BaseCommand
 from faker import Faker
 import random
-from shop.models import User, UserProfile, Address, Category, Brand, Product, Color, ProductVariant, ProductColor, Review, Basket, Order, BasketOrder, ProductOrder
+from shop.models import UserProfile, Address, Category, Brand, Product, Color, ProductVariant, ProductColor, Review, Basket, Order, BasketOrder, ProductOrder
+from django.contrib.auth.models import User
+
+
+
 
 # Инициализация Faker с русской локализацией
 fake = Faker('ru_RU')
@@ -105,7 +109,7 @@ class Command(BaseCommand):
         for category in CATEGORIES:
             Category.objects.create(
                 name=category,
-                photo='categories/default.jpg',  # Убедитесь, что у вас есть дефолтное изображение
+                photo='https://media.istockphoto.com/id/1186050470/ru/%D1%84%D0%BE%D1%82%D0%BE/%D1%87%D0%B5%D1%80%D0%BD%D0%B0%D1%8F-%D1%84%D1%83%D1%82%D0%B1%D0%BE%D0%BB%D0%BA%D0%B0-%D0%BD%D0%B0-%D0%B1%D0%B5%D0%BB%D0%BE%D0%BC-%D1%84%D0%BE%D0%BD%D0%B5.jpg?s=1024x1024&w=is&k=20&c=wtMmmHJ2jTTf5hMICBlagNJdlfbZfU7GVZb4Uq_ijB8=',  # Убедитесь, что у вас есть дефолтное изображение
                 slug=fake.unique.slug()
             )
 
@@ -168,13 +172,13 @@ class Command(BaseCommand):
                 
                 ProductVariant.objects.create(
                     name=variant_name,
-                    photo='variants/default.jpg',  # Убедитесь, что у вас есть дефолтное изображение
+                    photo=product.photo,  # Убедитесь, что у вас есть дефолтное изображение
                     product=product,
                     slug=f"{product.slug}-{i+1}",  # Добавляем индекс для уникальности
                     color=color,
                     category=product.category,
                     description=variant_description,
-                    images={'images': [fake.image_url() for _ in range(random.randint(1, 5))]},
+                    images={'images': ['https://colapsar.ru/upload/resize_cache/iblock/286/480_480_1/edkrinl60nxw2ina2u8q7uf6tai45woz.jpg' for _ in range(4)]},
                     brand=product.brand,
                     price=random.uniform(1000.0, 10000.0)
                 )

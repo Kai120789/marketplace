@@ -18,7 +18,7 @@
     {% for category in categories %}
     <a
       href="{% url 'category_detail' category.slug %}"
-      class="w-24 h-24 flex flex-col items-center justify-center bg-white rounded-lg shadow-md text-center text-xs shrink-0"
+      class="w-40 h-40 flex flex-col items-center justify-center bg-white rounded-lg shadow-md text-center text-xs shrink-0"
     >
       <img
         src="{{ category.photo }}"

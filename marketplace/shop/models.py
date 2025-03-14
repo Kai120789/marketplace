@@ -8,15 +8,9 @@ class TimeStampedModel(models.Model):
     class Meta:
         abstract = True
 
-
-class User(TimeStampedModel):
-    username = models.CharField(max_length=255, unique=True)
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.username
     
+from django.contrib.auth.models import User
+
 class UserProfile(TimeStampedModel):
     ROLE_CHOICES = [
         ('consumer', 'Consumer'),
@@ -30,7 +24,6 @@ class UserProfile(TimeStampedModel):
 
     def __str__(self):
         return f"{self.user.username} ({self.role})"
-
 
 class Address(TimeStampedModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

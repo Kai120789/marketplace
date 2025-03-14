@@ -1,15 +1,9 @@
 from django.contrib import admin
 from .models import (
-    User, UserProfile, Address, Category, Brand, Product, Color, ProductVariant, 
+    UserProfile, Address, Category, Brand, Product, Color, ProductVariant, 
     ProductColor, Review, Basket, Order, BasketOrder, ProductOrder
 )
 
-
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ("id", "username", "email", "created_at")
-    search_fields = ("username", "email")
-    readonly_fields = ("created_at", "updated_at")
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):

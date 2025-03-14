@@ -1,26 +1,44 @@
 from django.shortcuts import get_object_or_404, render
 from django.core.paginator import Paginator
 from shop.models import Category, Product, Brand, ProductVariant
-
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.http import JsonResponse
+from django.middleware.csrf import get_token
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.contrib.auth.models import User
+from django.utils.decorators import method_decorator
+from django.views import View
 from .models import Product, Category, Brand
 from django.db.models import Q
+from django.contrib import messages
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate, login
+
+
+
 
 def product_list(request):
     category_id = request.GET.get("category")
     brand_id = request.GET.get("brand")
     sort_by = request.GET.get("sort", "default_price")  # Сортировка по умолчанию — по цене
 
-    products = Product.objects.all()
+    products_list = Product.objects.all()
+    
 
     if category_id:
-        products = products.filter(category_id=category_id)
+        products_list = products_list.filter(category_id=category_id)
 
     if brand_id:
-        products = products.filter(brand_id=brand_id)
+        products_list = products_list.filter(brand_id=brand_id)
 
     if sort_by in ["default_price", "-default_price", "created_at", "-created_at"]:
-        products = products.order_by(sort_by)
+        products_list = products_list.order_by(sort_by)
+        
+    paginator = Paginator(products_list, 20)
+    page_number = request.GET.get('page')
+    products = paginator.get_page(page_number)
 
     categories = Category.objects.all()
     brands = Brand.objects.all()
@@ -77,3 +95,76 @@ def product_variant_detail(request, slug):
         'product_variant': product_variant,
         'all_product_variants': all_product_variants,
     })
+    
+
+
+def get_tokens_for_user(user):
+    """Генерация access и refresh токенов"""
+    refresh = RefreshToken.for_user(user)
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
+
+def register(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Пользователь с таким именем уже существует.")
+            return render(request, "auth/register.html")
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Пользователь с таким email уже существует.")
+            return render(request, "auth/register.html")
+
+        user = User.objects.create_user(username=username, email=email, password=password)
+        tokens = get_tokens_for_user(user)
+
+        messages.success(request, "Регистрация успешна! Можете войти.")
+        response = redirect("/shop/")
+        response.set_cookie("access_token", tokens["access"], httponly=True)
+        response.set_cookie("refresh_token", tokens["refresh"], httponly=True)
+        return response
+
+    return render(request, "auth/register.html")
+
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            tokens = get_tokens_for_user(user)
+
+            response = redirect("/shop/")
+            response.set_cookie("access_token", tokens["access"], httponly=True)
+            response.set_cookie("refresh_token", tokens["refresh"], httponly=True)
+            return response
+        else:
+            messages.error(request, "Неверное имя пользователя или пароль.")
+            return render(request, "auth/login.html")  # Добавлен return
+
+    return render(request, "auth/login.html")
+
+
+def logout_view(request):
+    logout(request)
+    response = redirect("login")
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+    return response
+
+
+def auth_middleware(get_response):
+    def middleware(request):
+        access_token = request.COOKIES.get("access_token")
+        if not access_token and request.path not in ["/login/", "/register/"]:
+            return redirect("/login/")
+        return get_response(request)
+    return middleware
+

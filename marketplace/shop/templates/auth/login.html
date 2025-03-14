@@ -1,0 +1,67 @@
+{% extends "base.html" %} {% block content %}
+<div class="flex items-center justify-center bg-gray-100 py-8">
+  <!-- Уменьшили отступы сверху и снизу -->
+  <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+    <h2 class="text-2xl font-bold mb-6 text-center">Вход</h2>
+
+    <!-- Сообщения об ошибках -->
+    {% if form.errors %}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      <p>Неверное имя пользователя или пароль. Пожалуйста, попробуйте снова.</p>
+    </div>
+    {% endif %}
+
+    <form method="post" class="space-y-4">
+      <!-- Уменьшили отступы между элементами формы -->
+      {% csrf_token %}
+
+      <!-- Поле для имени пользователя -->
+      <div>
+        <label for="username" class="block text-sm font-medium text-gray-700"
+          >Имя пользователя</label
+        >
+        <input
+          type="text"
+          name="username"
+          id="username"
+          required
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        />
+      </div>
+
+      <!-- Поле для пароля -->
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">Пароль</label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          required
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        />
+      </div>
+
+      <!-- Кнопка входа -->
+      <div>
+        <button
+          type="submit"
+          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Войти
+        </button>
+      </div>
+    </form>
+
+    <!-- Ссылка на регистрацию -->
+    <div class="mt-4 text-center">
+      <!-- Уменьшили отступ сверху -->
+      <p class="text-sm text-gray-600">
+        Нет аккаунта?
+        <a href="{% url 'register' %}" class="font-medium text-indigo-600 hover:text-indigo-500">
+          Зарегистрироваться
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -26,6 +26,19 @@
       .footer a:hover {
         color: #fbbf24;
       }
+
+      /* Добавляем стили для прижатия футера к низу */
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      main {
+        flex: 1;
+      }
     </style>
   </head>
   <body class="bg-gray-100">
@@ -36,11 +49,35 @@
           <a href="/shop" class="text-2xl font-bold">StreetWear RUSSKIY</a>
         </div>
         <nav>
-          <ul class="flex space-x-6">
+          <ul class="flex space-x-6 items-center">
             <li><a href="/shop/products/">Каталог</a></li>
             <li><a href="/shop/brands/">Бренды</a></li>
             <li><a href="#">Контакты</a></li>
             <li><a href="#">Корзина</a></li>
+            {% if request.COOKIES.access_token %}
+            <li>
+              <a
+                href="{% url 'logout' %}"
+                class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300"
+                >Выйти</a
+              >
+            </li>
+            {% else %}
+            <li>
+              <a
+                href="/shop/login/"
+                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300"
+                >Войти</a
+              >
+            </li>
+            <li>
+              <a
+                href="/shop/register/"
+                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-300"
+                >Регистрация</a
+              >
+            </li>
+            {% endif %}
           </ul>
         </nav>
       </div>
