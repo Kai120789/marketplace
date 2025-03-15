@@ -6,15 +6,16 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import csrf_exempt
-import json
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
 from django.views import View
-from .models import Product, Category, Brand
+from .models import Basket, Product, Category, Brand
 from django.db.models import Q
 from django.contrib import messages
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, login
+from django.views.decorators.http import require_POST
 
 
 
@@ -168,3 +169,24 @@ def auth_middleware(get_response):
         return get_response(request)
     return middleware
 
+
+
+@csrf_exempt
+@require_POST
+@login_required
+def add_to_cart(request, variant_id):
+    product_variant = get_object_or_404(ProductVariant, id=variant_id)
+    Basket.add_to_cart(request.user, product_variant)
+    return JsonResponse({"success": True, "message": "Товар добавлен в корзину"})
+
+@login_required
+def cart_view(request):
+    basket_items = Basket.objects.filter(user=request.user)
+    total_price = sum(item.product_variant.price * item.count for item in basket_items)
+    return render(request, "cart.html", {"basket_items": basket_items, "total_price": total_price})
+
+@login_required
+def remove_from_cart(request, item_id):
+    basket_item = get_object_or_404(Basket, id=item_id, user=request.user)
+    basket_item.delete()
+    return redirect("cart_view")

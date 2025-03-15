@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 from rest_framework_simplejwt.views import TokenRefreshView
-from .views import login_view, register, logout_view
+from .views import add_to_cart, cart_view, login_view, register, logout_view, remove_from_cart
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -13,6 +13,10 @@ urlpatterns = [
     
     path("login/", login_view, name="login"),
     path("register/", register, name="register"),
-    path("/logout", logout_view, name="logout"),
+    path("logout/", logout_view, name="logout"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    
+    path("add-to-cart/<int:variant_id>/", add_to_cart, name="add_to_cart"),
+    path("cart/", cart_view, name="cart_view"),
+    path("remove-from-cart/<int:item_id>/", remove_from_cart, name="remove_from_cart"),
 ]

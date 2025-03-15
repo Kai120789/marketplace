@@ -7,6 +7,7 @@ class TimeStampedModel(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ["-created_at"]
 
     
 from django.contrib.auth.models import User
@@ -119,6 +120,17 @@ class Basket(TimeStampedModel):
 
     def __str__(self):
         return f"{self.user.username}'s basket"
+    
+    @classmethod
+    def add_to_cart(cls, user, product_variant, count=1):
+        basket_item, created = cls.objects.get_or_create(
+            user=user, product_variant=product_variant,
+            defaults={'count': count, 'product': product_variant.product}
+        )
+        if not created:
+            basket_item.count = f"count + {count}"
+            basket_item.save(update_fields=['count'])
+        return basket_item
 
 
 class Order(TimeStampedModel):

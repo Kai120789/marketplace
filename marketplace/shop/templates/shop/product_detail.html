@@ -78,10 +78,33 @@ RUSSKIY{% endblock %} {% block content %}
 
       <div class="flex space-x-4">
         <button
+          onclick="addToCart({{ product_variant.id }})"
           class="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors"
         >
           Добавить в корзину
         </button>
+
+        <script>
+          function addToCart(variantId) {
+            fetch(`/shop/add-to-cart/${variantId}/`, {
+              method: 'POST',
+              headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({}),
+            })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error('Ошибка ' + response.status);
+                }
+                return response.json();
+              })
+              .then((data) => alert(data.message))
+              .catch((error) => console.error('Ошибка:', error));
+          }
+        </script>
+
         <button
           class="bg-yellow-400 text-black px-6 py-3 rounded-lg hover:bg-yellow-500 transition-colors"
         >

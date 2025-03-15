@@ -10,6 +10,11 @@
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
     />
+    <script>
+      function toggleMenu() {
+        document.getElementById('mobile-menu').classList.toggle('hidden');
+      }
+    </script>
     <style>
       .header,
       .footer {
@@ -48,13 +53,14 @@
           <img src="{% static 'shop/icon.png' %}" alt="icon" class="w-12 h-12 rounded-full" />
           <a href="/shop" class="text-2xl font-bold">StreetWear RUSSKIY</a>
         </div>
-        <nav>
+        <button class="lg:hidden text-white focus:outline-none" onclick="toggleMenu()">☰</button>
+        <nav class="hidden lg:block">
           <ul class="flex space-x-6 items-center">
             <li><a href="/shop/products/">Каталог</a></li>
             <li><a href="/shop/brands/">Бренды</a></li>
             <li><a href="#">Контакты</a></li>
-            <li><a href="#">Корзина</a></li>
             {% if request.COOKIES.access_token %}
+            <li><a href="/shop/cart/">Корзина</a></li>
             <li>
               <a
                 href="{% url 'logout' %}"
@@ -63,6 +69,7 @@
               >
             </li>
             {% else %}
+            <li><a href="#">Корзина</a></li>
             <li>
               <a
                 href="/shop/login/"
@@ -81,6 +88,40 @@
           </ul>
         </nav>
       </div>
+      <!-- Мобильное меню -->
+      <nav id="mobile-menu" class="hidden lg:hidden bg-gray-900 py-4">
+        <ul class="flex flex-col space-y-4 items-center text-white">
+          <li><a href="/shop/products/">Каталог</a></li>
+          <li><a href="/shop/brands/">Бренды</a></li>
+          <li><a href="#">Контакты</a></li>
+          {% if request.COOKIES.access_token %}
+          <li><a href="/shop/cart/">Корзина</a></li>
+          <li>
+            <a
+              href="{% url 'logout' %}"
+              class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300"
+              >Выйти</a
+            >
+          </li>
+          {% else %}
+          <li><a href="#">Корзина</a></li>
+          <li>
+            <a
+              href="/shop/login/"
+              class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300"
+              >Войти</a
+            >
+          </li>
+          <li>
+            <a
+              href="/shop/register/"
+              class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-300"
+              >Регистрация</a
+            >
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
     </header>
 
     <main class="container mx-auto px-4 py-8">{% block content %}{% endblock %}</main>
