@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+from datetime import timedelta
 import os
 from pathlib import Path
 
@@ -43,6 +44,13 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
 ]
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Время жизни access токена
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),    # Время жизни refresh токена
+    'ROTATE_REFRESH_TOKENS': True,                  # Автоматически обновлять refresh токен
+    'BLACKLIST_AFTER_ROTATION': True,               # Добавлять старые токены в черный список
+}
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -57,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'shop.middleware.TokenExpirationMiddleware',
 ]
 
 ROOT_URLCONF = 'marketplace.urls'
@@ -113,7 +122,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'ru'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'UTC'
 

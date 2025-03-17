@@ -4,9 +4,6 @@ import random
 from shop.models import UserProfile, Address, Category, Brand, Product, Color, ProductVariant, ProductColor, Review, Basket, Order, BasketOrder, ProductOrder
 from django.contrib.auth.models import User
 
-
-
-
 # Инициализация Faker с русской локализацией
 fake = Faker('ru_RU')
 
@@ -157,14 +154,14 @@ class Command(BaseCommand):
             Color.objects.create(
                 name=color["name"],
                 color=color["color"],
-                image='colors/default.jpg'  # Убедитесь, что у вас есть дефолтное изображение
+                image='colors/default.jpg'
             )
 
     def create_product_variants(self):
         products = list(Product.objects.all())
         colors = list(Color.objects.all())
         for product in products:
-            num_variants = random.randint(2, 4)  # Создаём от 2 до 4 вариаций для каждого продукта
+            num_variants = random.randint(2, 4)
             for i in range(num_variants):
                 color = random.choice(colors)
                 variant_name = f"{product.name} ({color.name})"
@@ -172,9 +169,9 @@ class Command(BaseCommand):
                 
                 ProductVariant.objects.create(
                     name=variant_name,
-                    photo=product.photo,  # Убедитесь, что у вас есть дефолтное изображение
+                    photo=product.photo,
                     product=product,
-                    slug=f"{product.slug}-{i+1}",  # Добавляем индекс для уникальности
+                    slug=f"{product.slug}-{i+1}",
                     color=color,
                     category=product.category,
                     description=variant_description,
@@ -188,7 +185,7 @@ class Command(BaseCommand):
         products = list(Product.objects.all())
         colors = list(Color.objects.all())
         for product in products:
-            for _ in range(random.randint(1, 3)):  # Добавляем от 1 до 3 цветов для каждого продукта
+            for _ in range(random.randint(1, 3)):
                 ProductColor.objects.create(
                     product=product,
                     color=random.choice(colors)

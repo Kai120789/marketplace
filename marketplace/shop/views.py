@@ -143,12 +143,12 @@ def login_view(request):
             tokens = get_tokens_for_user(user)
 
             response = redirect("/shop/")
-            response.set_cookie("access_token", tokens["access"], httponly=True)
-            response.set_cookie("refresh_token", tokens["refresh"], httponly=True)
+            response.set_cookie("access_token", tokens["access"], httponly=True, max_age=900)  # 15 минут
+            response.set_cookie("refresh_token", tokens["refresh"], httponly=True, max_age=604800)  # 7 дней
             return response
         else:
             messages.error(request, "Неверное имя пользователя или пароль.")
-            return render(request, "auth/login.html")  # Добавлен return
+            return render(request, "auth/login.html")
 
     return render(request, "auth/login.html")
 
@@ -160,14 +160,6 @@ def logout_view(request):
     response.delete_cookie("refresh_token")
     return response
 
-
-def auth_middleware(get_response):
-    def middleware(request):
-        access_token = request.COOKIES.get("access_token")
-        if not access_token and request.path not in ["/login/", "/register/"]:
-            return redirect("/login/")
-        return get_response(request)
-    return middleware
 
 
 
@@ -190,3 +182,8 @@ def remove_from_cart(request, item_id):
     basket_item = get_object_or_404(Basket, id=item_id, user=request.user)
     basket_item.delete()
     return redirect("cart_view")
+
+
+def brand_detail(request, brand_id):
+    brand = get_object_or_404(Brand, id=brand_id)
+    return render(request, 'shop/brand_detail.html', {'brand': brand})

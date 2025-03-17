@@ -43,17 +43,24 @@
   <button type="submit" class="px-4 py-2 bg-black text-white rounded">Применить</button>
 </form>
 
-<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
   {% for product in products %}
-  <div class="bg-white p-4 rounded-lg shadow-md">
+  <div class="bg-white p-4 rounded-lg shadow-md flex flex-col">
     <a href="{% url 'product_detail' product.slug %}">
-      <img src="{{ product.photo }}" alt="{{ product.name }}" class="w-full h-48 object-cover rounded-lg" />
+      <img
+        src="{{ product.photo }}"
+        alt="{{ product.name }}"
+        class="w-full h-48 sm:h-56 md:h-64 object-cover rounded-lg"
+      />
     </a>
-    <a href="{% url 'product_detail' product.slug %}">
-      <h3 class="text-xl font-semibold mt-4 hover:text-gray-700">{{ product.name }}</h3>
-    </a>
-    <p class="text-gray-600">{{ product.description|truncatechars:50 }}</p>
-    <p class="text-lg font-bold mt-2">{{ product.default_price }} руб.</p>
+    <!-- Название и цена -->
+    <div class="flex-grow">
+      <a href="{% url 'product_detail' product.slug %}">
+        <h3 class="text-xl font-semibold mt-4 hover:text-gray-700">{{ product.name }}</h3>
+      </a>
+      <p class="text-gray-600">{{ product.description|truncatechars:50 }}</p>
+      <p class="text-lg font-bold mt-2">{{ product.default_price }} руб.</p>
+    </div>
   </div>
   {% empty %}
   <p class="col-span-full text-center text-gray-600">Товары не найдены.</p>

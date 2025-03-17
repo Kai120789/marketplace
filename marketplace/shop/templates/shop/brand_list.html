@@ -2,21 +2,22 @@
 <div class="container mx-auto px-4 py-8">
   <h1 class="text-3xl font-bold mb-8">Наши бренды</h1>
 
-  <!-- Сетка брендов -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
     {% for brand in brands %}
     <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-6">
-      <!-- Круглый логотип -->
       <div class="flex-shrink-0">
-        <img
-          src="{{ brand.photo }}"
-          alt="{{ brand.name }}"
-          class="w-24 h-24 rounded-full object-cover"
-        />
+        <a href="{% url 'brand_detail' brand.id %}">
+          <img
+            src="{{ brand.photo }}"
+            alt="{{ brand.name }}"
+            class="w-24 h-24 rounded-full object-cover"
+          />
+        </a>
       </div>
-      <!-- Описание бренда -->
       <div>
-        <h2 class="text-xl font-semibold">{{ brand.name }}</h2>
+        <h2 class="text-xl font-semibold">
+          <a href="{% url 'brand_detail' brand.id %}">{{ brand.name }}</a>
+        </h2>
         <p class="text-gray-600 mt-2">{{ brand.description }}</p>
       </div>
     </div>
