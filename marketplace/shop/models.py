@@ -113,7 +113,7 @@ class ProductVariant(TimeStampedModel):
     color = models.ForeignKey(Color, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     description = models.TextField()
-    images = models.JSONField()  # Храним массив ссылок на изображения
+    images = models.JSONField()
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     
