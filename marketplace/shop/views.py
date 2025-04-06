@@ -125,9 +125,7 @@ def register(request):
         tokens = get_tokens_for_user(user)
 
         messages.success(request, "Регистрация успешна! Можете войти.")
-        response = redirect("/shop/")
-        response.set_cookie("access_token", tokens["access"], httponly=True)
-        response.set_cookie("refresh_token", tokens["refresh"], httponly=True)
+        response = redirect("/shop/login")
         return response
 
     return render(request, "auth/register.html")

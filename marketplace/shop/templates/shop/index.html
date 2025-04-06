@@ -56,7 +56,9 @@
   <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
     {% for brand in brands %}
     <div class="bg-white p-4 rounded-lg shadow-md text-center">
-      <img src="{{ brand.photo }}" alt="{{ brand.name }}" class="w-full h-24 object-contain" />
+      <a href="{% url 'brand_detail' brand.id %}">
+        <img src="{{ brand.photo }}" alt="{{ brand.name }}" class="w-full h-24 object-contain" />
+      </a>
       <h3 class="text-lg font-semibold mt-2">{{ brand.name }}</h3>
     </div>
     {% endfor %}
