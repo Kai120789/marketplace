@@ -129,8 +129,18 @@ RUSSKIY{% endblock %} {% block content %}
       <div class="mt-6">
         <h2 class="text-xl font-semibold mb-2">Детали товара</h2>
         <ul class="text-gray-600">
-          <li><strong>Бренд:</strong> {{ product_variant.brand.name }}</li>
-          <li><strong>Категория:</strong> {{ product_variant.category.name }}</li>
+          <li>
+            <strong>Бренд:</strong>
+            <a href="{% url 'brand_detail' product_variant.brand.id %}"
+              >{{ product_variant.brand.name }}</a
+            >
+          </li>
+          <li>
+            <strong>Категория:</strong>
+            <a href="{% url 'category_detail' product_variant.category.slug %}"
+              >{{ product_variant.category.name }}</a
+            >
+          </li>
           <li><strong>Цвет:</strong> {{ product_variant.color.name }}</li>
         </ul>
       </div>
