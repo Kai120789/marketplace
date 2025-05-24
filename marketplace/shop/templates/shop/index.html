@@ -1,68 +1,241 @@
-{% extends 'base.html' %} {% load static %}
-<!-- -->
-{% block title %}Главная страница{% endblock %} {% block content %}
-<div class="bg-black flex justify-center items-center py-6 mb-12 rounded-2xl shadow-md">
-  <img
-    src="{% static 'shop/russkiy.png' %}"
-    alt="Баннер"
-    class="w-auto h-auto max-w-l mx-auto rounded-2xl"
-  />
+{% extends 'base.html' %} 
+{% load static %}
+
+{% block title %}Главная страница{% endblock %} 
+
+{% block content %}
+<div class="relative">
+  <!-- Поисковая строка -->
+  <div class="max-w-2xl mx-auto mb-12 relative">
+    <form id="search-form" class="w-full">
+      <div class="relative">
+        <input 
+          type="text" 
+          id="search-input"
+          placeholder="Поиск категорий, брендов и товаров..."
+          class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+          autocomplete="off"
+        >
+        <button type="submit" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+    </form>
+    <!-- Выпадающий список результатов -->
+    <div id="search-results" class="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg hidden overflow-hidden">
+      <div class="py-2 max-h-96 overflow-y-auto">
+        <!-- Категории -->
+        <div id="categories-section">
+          <div class="px-4 py-2 text-sm font-medium text-gray-500 border-b">Категории</div>
+          <div id="categories-results" class="divide-y"></div>
+        </div>
+        <!-- Бренды -->
+        <div id="brands-section">
+          <div class="px-4 py-2 text-sm font-medium text-gray-500 border-b">Бренды</div>
+          <div id="brands-results" class="divide-y"></div>
+        </div>
+        <!-- Товары -->
+        <div id="products-section">
+          <div class="px-4 py-2 text-sm font-medium text-gray-500 border-b">Товары</div>
+          <div id="products-results" class="divide-y"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-black flex justify-center items-center py-6 mb-12 rounded-2xl shadow-md">
+    <img
+      src="{% static 'shop/russkiy.png' %}"
+      alt="Баннер"
+      class="w-auto h-auto max-w-l mx-auto rounded-2xl"
+    />
+  </div>
+
+  <h1 class="text-3xl font-bold mb-8">Добро пожаловать в StreetWear RUSSKIY!</h1>
+
+  <section class="mb-12">
+    <h2 class="text-2xl font-semibold mb-4">Категории</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+      {% for category in categories %}
+      <a
+        href="{% url 'category_detail' category.slug %}"
+        class="w-full h-40 flex flex-col items-center justify-center bg-white rounded-lg shadow-md text-center text-xs"
+      >
+        <img
+          src="{{ category.photo }}"
+          alt="{{ category.name }}"
+          class="w-12 h-12 object-cover rounded-md"
+        />
+        <span class="mt-1 font-medium text-[10px]">{{ category.name }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="mb-12">
+    <h2 class="text-2xl font-semibold mb-4">Популярные товары</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      {% for product in products %}
+      <div class="bg-white p-4 rounded-lg shadow-md">
+        <a href="{% url 'product_detail' product.slug %}">
+          <img
+            src="{{ product.photo }}"
+            alt="{{ product.name }}"
+            class="w-full h-48 sm:h-56 md:h-64 object-cover rounded-lg"
+          />
+        </a>
+        <h3 class="text-xl font-semibold mt-4">{{ product.name }}</h3>
+        <p class="text-gray-600">{{ product.description|truncatechars:50 }}</p>
+        <p class="text-lg font-bold mt-2">{{ product.default_price }} руб.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section>
+    <h2 class="text-2xl font-semibold mb-4">Популярные бренды</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      {% for brand in brands %}
+      <div class="bg-white p-4 rounded-lg shadow-md text-center">
+        <a href="{% url 'brand_detail' brand.id %}">
+          <img src="{{ brand.photo }}" alt="{{ brand.name }}" class="w-full h-24 object-contain" />
+        </a>
+        <h3 class="text-lg font-semibold mt-2">{{ brand.name }}</h3>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
 </div>
 
-<h1 class="text-3xl font-bold mb-8">Добро пожаловать в StreetWear RUSSKIY!</h1>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('search-input');
+  const searchForm = document.getElementById('search-form');
+  const searchResults = document.getElementById('search-results');
+  const categoriesSection = document.getElementById('categories-section');
+  const categoriesResults = document.getElementById('categories-results');
+  const brandsSection = document.getElementById('brands-section');
+  const brandsResults = document.getElementById('brands-results');
+  const productsSection = document.getElementById('products-section');
+  const productsResults = document.getElementById('products-results');
 
-<section class="mb-12">
-  <h2 class="text-2xl font-semibold mb-4">Категории</h2>
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-    {% for category in categories %}
-    <a
-      href="{% url 'category_detail' category.slug %}"
-      class="w-full h-40 flex flex-col items-center justify-center bg-white rounded-lg shadow-md text-center text-xs"
-    >
-      <img
-        src="{{ category.photo }}"
-        alt="{{ category.name }}"
-        class="w-12 h-12 object-cover rounded-md"
-      />
-      <span class="mt-1 font-medium text-[10px]">{{ category.name }}</span>
-    </a>
-    {% endfor %}
-  </div>
-</section>
+  // Функция для выполнения поиска
+  async function performSearch(query) {
+    if (query.length < 2) {
+      searchResults.classList.add('hidden');
+      return;
+    }
 
-<section class="mb-12">
-  <h2 class="text-2xl font-semibold mb-4">Популярные товары</h2>
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-    {% for product in products %}
-    <div class="bg-white p-4 rounded-lg shadow-md">
-      <a href="{% url 'product_detail' product.slug %}">
-        <img
-          src="{{ product.photo }}"
-          alt="{{ product.name }}"
-          class="w-full h-48 sm:h-56 md:h-64 object-cover rounded-lg"
-        />
-      </a>
-      <h3 class="text-xl font-semibold mt-4">{{ product.name }}</h3>
-      <p class="text-gray-600">{{ product.description|truncatechars:50 }}</p>
-      <p class="text-lg font-bold mt-2">{{ product.default_price }} руб.</p>
-    </div>
-    {% endfor %}
-  </div>
-</section>
+    try {
+      const response = await fetch(`/search/?q=${encodeURIComponent(query)}`);
+      const data = await response.json();
 
-<!-- Популярные бренды -->
-<section>
-  <h2 class="text-2xl font-semibold mb-4">Популярные бренды</h2>
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-    {% for brand in brands %}
-    <div class="bg-white p-4 rounded-lg shadow-md text-center">
-      <a href="{% url 'brand_detail' brand.id %}">
-        <img src="{{ brand.photo }}" alt="{{ brand.name }}" class="w-full h-24 object-contain" />
-      </a>
-      <h3 class="text-lg font-semibold mt-2">{{ brand.name }}</h3>
-    </div>
-    {% endfor %}
-  </div>
-</section>
+      // Очищаем предыдущие результаты
+      categoriesResults.innerHTML = '';
+      brandsResults.innerHTML = '';
+      productsResults.innerHTML = '';
+
+      // Скрываем все секции изначально
+      categoriesSection.classList.add('hidden');
+      brandsSection.classList.add('hidden');
+      productsSection.classList.add('hidden');
+
+      // Отображаем категории (максимум 5)
+      if (data.categories && data.categories.length > 0) {
+        categoriesSection.classList.remove('hidden');
+        data.categories.slice(0, 5).forEach(category => {
+          const item = document.createElement('a');
+          item.href = `/shop/categories/${category.slug}/`;
+          item.className = 'block px-4 py-2 hover:bg-gray-100 transition-colors';
+          item.innerHTML = `
+            <div class="flex items-center">
+              <img src="${category.photo}" class="w-8 h-8 object-cover rounded mr-3">
+              <span>${category.name}</span>
+            </div>
+          `;
+          categoriesResults.appendChild(item);
+        });
+      }
+
+      // Отображаем бренды (максимум 5)
+      if (data.brands && data.brands.length > 0) {
+        brandsSection.classList.remove('hidden');
+        data.brands.slice(0, 5).forEach(brand => {
+          const item = document.createElement('a');
+          item.href = `/shop/brands/${brand.id}/`;
+          item.className = 'block px-4 py-2 hover:bg-gray-100 transition-colors';
+          item.innerHTML = `
+            <div class="flex items-center">
+              <img src="${brand.photo}" class="w-8 h-8 object-contain mr-3">
+              <span>${brand.name}</span>
+            </div>
+          `;
+          brandsResults.appendChild(item);
+        });
+      }
+
+      // Отображаем товары (максимум 5)
+      if (data.products && data.products.length > 0) {
+        productsSection.classList.remove('hidden');
+        data.products.slice(0, 5).forEach(product => {
+          const item = document.createElement('a');
+          item.href = `/shop/products/${product.slug}-1/`;
+          item.className = 'block px-4 py-2 hover:bg-gray-100 transition-colors';
+          item.innerHTML = `
+            <div class="flex items-center">
+              <img src="${product.photo}" class="w-8 h-8 object-cover rounded mr-3">
+              <div>
+                <div class="font-medium">${product.name}</div>
+                <div class="text-sm text-gray-500">${product.default_price} руб.</div>
+              </div>
+            </div>
+          `;
+          productsResults.appendChild(item);
+        });
+      }
+
+      // Показываем результаты, если есть хотя бы один раздел
+      if (!categoriesSection.classList.contains('hidden') || 
+          !brandsSection.classList.contains('hidden') || 
+          !productsSection.classList.contains('hidden')) {
+        searchResults.classList.remove('hidden');
+      } else {
+        searchResults.classList.add('hidden');
+      }
+
+    } catch (error) {
+      console.error('Ошибка при выполнении поиска:', error);
+    }
+  }
+
+  // Обработчик ввода в поисковую строку
+  searchInput.addEventListener('input', function() {
+    performSearch(this.value.trim());
+  });
+
+  // Предотвращаем отправку формы
+  searchForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (searchInput.value.trim().length > 0) {
+      // Здесь можно добавить переход на страницу поиска
+      console.log('Выполнение поиска:', searchInput.value.trim());
+    }
+  });
+
+  // Скрываем результаты при клике вне поиска
+  document.addEventListener('click', function(e) {
+    if (!searchForm.contains(e.target)) {
+      searchResults.classList.add('hidden');
+    }
+  });
+
+  // Показываем результаты при фокусе, если есть текст
+  searchInput.addEventListener('focus', function() {
+    if (this.value.trim().length >= 2) {
+      performSearch(this.value.trim());
+    }
+  });
+});
+</script>
 
 {% endblock %}

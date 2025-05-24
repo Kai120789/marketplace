@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all hover:shadow-xl">
+    <div class="bg-gradient-to-r from-green-500 to-green-500 p-6">
+      <h1 class="text-2xl font-bold text-white">Добавить отзыв</h1>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data" class="p-6 space-y-6">
+      {% csrf_token %}
+      
+      <div class="space-y-6">
+        {% for field in form %}
+        <div class="space-y-2">
+          <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+            {{ field.label }}
+            {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+          </label>
+          
+          {% if field.name == 'rating' %}
+          <div class="rating-stars flex">
+            {% for i in "12345" %}
+            <label class="cursor-pointer text-2xl">
+              <input type="radio" name="{{ field.name }}" value="{{ i }}" 
+                     class="hidden peer" {% if field.value == i %}checked{% endif %}>
+              <span class="peer-checked:text-yellow-400 text-gray-300 hover:text-yellow-300">★</span>
+            </label>
+            {% endfor %}
+          </div>
+          
+          {% elif field.name == 'description' %}
+          <textarea id="{{ field.id_for_label }}" name="{{ field.name }}"
+            class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+            rows="4">{{ field.value|default:'' }}</textarea>
+          
+          {% elif field.field.widget.input_type == 'file' %}
+          <div class="file-upload">
+            <label class="cursor-pointer">
+              <div class="flex items-center justify-center px-4 py-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-400 transition-colors">
+                <div class="text-center">
+                  <i class="fas fa-camera text-3xl text-green-500 mb-2"></i>
+                  <p class="text-sm text-gray-600">
+                    {% if field.value %}
+                    Текущее фото: <span class="font-medium">{{ field.value }}</span>
+                    {% else %}
+                    Загрузить фото (необязательно)
+                    {% endif %}
+                  </p>
+                </div>
+                {{ field }}
+              </div>
+            </label>
+          </div>
+          
+          {% else %}
+          <input type="{{ field.field.widget.input_type }}" id="{{ field.id_for_label }}" name="{{ field.name }}"
+            value="{{ field.value|default:'' }}"
+            class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+            {% if field.field.required %}required{% endif %}>
+          {% endif %}
+          
+          {% for error in field.errors %}
+          <p class="text-xs text-red-500">{{ error }}</p>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+      
+      <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+        <a href="{{ request.META.HTTP_REFERER }}" 
+           class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+          Назад
+        </a>
+        <button type="submit" 
+                class="px-6 py-2 bg-gradient-to-r from-green-500 to-green-500 rounded-lg text-white hover:from-green-600 hover:to-green-600 transition-all shadow-md hover:shadow-lg">
+          Опубликовать
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .file-upload input[type="file"] {
+    display: none;
+  }
+  
+  .rating-stars input:checked ~ span {
+    color: #facc15;
+  }
+</style>
+{% endblock %}

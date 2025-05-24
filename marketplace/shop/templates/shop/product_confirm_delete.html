@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-8">
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all hover:shadow-xl">
+    <div class="bg-gradient-to-r from-red-500 to-red-500 p-6">
+      <h1 class="text-2xl font-bold text-white">Подтверждение удаления</h1>
+    </div>
+    
+    <div class="p-6 space-y-6">
+      <div class="text-center">
+        <i class="fas fa-exclamation-triangle text-5xl text-red-500 mb-4"></i>
+        <p class="text-lg font-medium text-gray-700">
+          Вы уверены, что хотите удалить товар <span class="font-bold">"{{ object.name }}"</span>?
+        </p>
+        <p class="text-sm text-gray-500 mt-2">
+          Это действие нельзя будет отменить. Все связанные данные будут удалены.
+        </p>
+      </div>
+      
+      <form method="post" class="flex justify-center space-x-4 pt-4 border-t border-gray-200">
+        {% csrf_token %}
+        <a href="{% url 'product_detail' object.slug %}" 
+           class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+          <i class="fas fa-times mr-2"></i>Отмена
+        </a>
+        <button type="submit" 
+                class="px-6 py-2 bg-gradient-to-r from-red-500 to-red-500 rounded-lg text-white hover:from-red-600 hover:to-orange-600 transition-all shadow-md hover:shadow-lg">
+          <i class="fas fa-trash mr-2"></i>Удалить
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

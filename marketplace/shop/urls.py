@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 from rest_framework_simplejwt.views import TokenRefreshView
-from .views import add_to_cart, cart_view, login_view, register, logout_view, remove_from_cart, brand_detail
+from .views import add_to_cart, cart_view, login_view, register, logout_view, remove_from_cart, brand_detail, product_create, product_update, product_delete, review_create, review_delete, product_variant_create, product_variant_update, product_variant_delete
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -20,4 +20,14 @@ urlpatterns = [
     path("add-to-cart/<int:variant_id>/", add_to_cart, name="add_to_cart"),
     path("cart/", cart_view, name="cart_view"),
     path("remove-from-cart/<int:item_id>/", remove_from_cart, name="remove_from_cart"),
+
+    path('products/create/', product_create, name='product_create'),
+    path('products/<int:pk>/update/', product_update, name='product_update'),
+    path('products/<int:pk>/delete/', product_delete, name='product_delete'),
+    path('reviews/create/<int:product_id>/', review_create, name='review_create'),
+    path('reviews/<int:pk>/delete/', review_delete, name='review_delete'),
+
+    path('product/<slug:product_slug>/variant/create/', views.product_variant_create, name='product_variant_create'),
+    path('variant/<slug:slug>/edit/', views.product_variant_update, name='product_variant_update'),
+    path('variant/<slug:slug>/delete/', views.product_variant_delete, name='product_variant_delete'),
 ]

@@ -185,3 +185,161 @@ def remove_from_cart(request, item_id):
 def brand_detail(request, brand_id):
     brand = get_object_or_404(Brand, id=brand_id)
     return render(request, 'shop/brand_detail.html', {'brand': brand})
+
+
+from .forms import ProductForm, ReviewForm, OrderForm, ProductVariantForm
+
+@login_required
+def product_create(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            product = form.save(commit=False)
+            product.added_by = request.user
+            product.save()  # Теперь сохраняем с дополнительными данными
+            return redirect('product_detail', pk=product.pk)
+            return redirect('product_list')
+    else:
+        form = ProductForm()
+    return render(request, 'shop/product_form.html', {'form': form})
+
+@login_required
+def product_update(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect('product_detail', pk=product.pk)
+    else:
+        form = ProductForm(instance=product)
+    return render(request, 'shop/product_form.html', {'form': form})
+
+@login_required
+def product_update(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.user.profile.role != 'admin':
+        return HttpResponseForbidden()
+    
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Товар успешно обновлен')
+            return redirect('product_detail', slug=product.slug)
+    else:
+        form = ProductForm(instance=product)
+    return render(request, 'shop/product_form.html', {'form': form})
+
+@login_required
+def product_delete(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.user.profile.role != 'admin':
+        return HttpResponseForbidden()
+    
+    if request.method == 'POST':
+        product.delete()
+        messages.success(request, 'Товар успешно удален')
+        return redirect('product_list')
+    return render(request, 'shop/product_confirm_delete.html', {'object': product})
+
+@login_required
+def review_create(request, product_id):
+    product = get_object_or_404(Product, pk=product_id)
+    if request.user.profile.role != 'admin':
+        return HttpResponseForbidden()
+    
+    if request.method == 'POST':
+        form = ReviewForm(request.POST, request.FILES)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.product = product
+            review.save()
+            return redirect('product_detail', slug=product.slug)
+    else:
+        form = ReviewForm()
+    return render(request, 'shop/review_form.html', {'form': form})
+
+@login_required
+def review_delete(request, pk):
+    review = get_object_or_404(Review, pk=pk)
+    if request.user.profile.role != 'admin':
+        return HttpResponseForbidden()
+    
+    review.delete()
+    messages.success(request, 'Отзыв успешно удален')
+    return redirect('product_detail', slug=review.product.slug)
+
+
+from django.http import JsonResponse
+from django.db.models import Q
+from .models import Category, Brand, Product
+
+def search_view(request):
+    query = request.GET.get('q', '').strip()
+    results = {
+        'categories': [],
+        'brands': [],
+        'products': []
+    }
+
+    if query:
+        categories = Category.objects.filter(
+            Q(name__icontains=query)
+        ).values('id', 'name', 'slug', 'photo')[:5]
+        results['categories'] = list(categories)
+
+        brands = Brand.objects.filter(
+            Q(name__icontains=query)
+        ).values('id', 'name', 'photo')[:5]
+        results['brands'] = list(brands)
+
+        products = Product.objects.filter(
+            Q(name__icontains=query)
+        ).values('id', 'name', 'slug', 'photo', 'default_price')[:5]
+        results['products'] = list(products)
+
+    return JsonResponse(results)
+
+
+@login_required
+def product_variant_create(request, product_slug):
+    product = get_object_or_404(Product, slug=product_slug)
+    if request.method == 'POST':
+        form = ProductVariantForm(request.POST, request.FILES)
+        if form.is_valid():
+            variant = form.save(commit=False)
+            variant.product = product
+            variant.slug = f"{product.slug}-{ProductVariant.objects.filter(product=product).count() + 1}"
+            variant.save()
+            return redirect('product_variant_detail', slug=variant.slug)
+    else:
+        form = ProductVariantForm(initial={'product': product})
+    return render(request, 'shop/product_variant_form.html', {
+        'form': form,
+        'product': product
+    })
+
+@login_required
+def product_variant_update(request, slug):
+    variant = get_object_or_404(ProductVariant, slug=slug)
+    if request.method == 'POST':
+        form = ProductVariantForm(request.POST, request.FILES, instance=variant)
+        if form.is_valid():
+            form.save()
+            return redirect('product_variant_detail', slug=variant.slug)
+    else:
+        form = ProductVariantForm(instance=variant)
+    return render(request, 'shop/product_variant_form.html', {
+        'form': form,
+        'variant': variant
+    })
+
+@login_required
+def product_variant_delete(request, slug):
+    variant = get_object_or_404(ProductVariant, slug=slug)
+    product_slug = variant.product.slug
+    if request.method == 'POST':
+        variant.delete()
+        return redirect('product_detail', slug=product_slug)
+    return render(request, 'shop/product_variant_confirm_delete.html', {'variant': variant})

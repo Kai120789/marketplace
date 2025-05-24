@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6">
+      <h1 class="text-2xl font-bold text-white">
+        {% if object %}Редактирование{% else %}Создание{% endif %} товара
+      </h1>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data" class="p-6 space-y-6">
+      {% csrf_token %}
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% for field in form %}
+        <div class="space-y-2">
+          <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+            {{ field.label }}
+            {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+          </label>
+          
+          {% if field.name == 'description' %}
+          <textarea id="{{ field.id_for_label }}" name="{{ field.name }}"
+            class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+            rows="4">{{ field.value|default:'' }}</textarea>
+          
+          
+          {% else %}
+          <input type="{{ field.field.widget.input_type }}" id="{{ field.id_for_label }}" name="{{ field.name }}"
+            value="{{ field.value|default:'' }}"
+            class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+            {% if field.field.required %}required{% endif %}>
+          {% endif %}
+          
+          {% if field.help_text %}
+          <p class="text-xs text-gray-500">{{ field.help_text }}</p>
+          {% endif %}
+          
+          {% for error in field.errors %}
+          <p class="text-xs text-red-500">{{ error }}</p>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+      
+      <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+        <a href="{% if object %}{% url 'product_detail' object.slug %}{% else %}{% url 'product_list' %}{% endif %}"
+           class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+          Отмена
+        </a>
+        <button type="submit" 
+                class="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg text-white hover:from-blue-600 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+          Сохранить
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .file-upload input[type="file"] {
+    display: none;
+  }
+  
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+</style>
+{% endblock %}

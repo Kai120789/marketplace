@@ -1,6 +1,11 @@
-{% extends 'base.html' %} {% load static %} {% block title %}{{ product_variant.name }} - StreetWear
-RUSSKIY{% endblock %} {% block content %}
+{% extends 'base.html' %} 
+{% load static %} 
+
+{% block title %}{{ product_variant.name }} - StreetWear RUSSKIY{% endblock %} 
+
+{% block content %}
 <div class="container mx-auto px-4 py-8">
+  <!-- Хлебные крошки -->
   <nav class="flex mb-6" aria-label="Breadcrumb">
     <ol class="inline-flex items-center space-x-1 md:space-x-3">
       <li class="inline-flex items-center">
@@ -47,6 +52,25 @@ RUSSKIY{% endblock %} {% block content %}
     </ol>
   </nav>
 
+  <!-- Кнопки администратора -->
+  {% if user.is_authenticated and user.profile.role == 'admin' %}
+  
+  <div class="flex flex-wrap gap-2 mb-6">
+    <a href="{% url 'product_variant_update' product_variant.slug %}" 
+      class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+      <i class="fas fa-edit mr-2"></i>Редактировать товар
+    </a>
+    <a href="{% url 'product_delete' product_variant.product.id %}" 
+       class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors">
+      <i class="fas fa-trash mr-2"></i>Удалить товар
+    </a>
+    <a href="{% url 'review_create' product_variant.product.id %}" 
+       class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
+      <i class="fas fa-comment-medical mr-2"></i>Добавить отзыв
+    </a>
+  </div>
+  {% endif %}
+
   <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
     <div class="space-y-4">
       <div class="bg-white p-4 rounded-lg shadow-md">
@@ -56,69 +80,52 @@ RUSSKIY{% endblock %} {% block content %}
           class="w-full h-auto rounded-lg"
         />
       </div>
-      <div class="flex space-x-2">
+      <div class="flex space-x-2 overflow-x-auto py-2">
         {% for image in product_variant.images.images %}
         <div class="bg-white p-2 rounded-lg shadow-md flex-shrink-0">
-          <img src="{{ image }}" alt="{{ product_variant.name }}" class="w-24 h-24 rounded-lg" />
+          <img src="{{ image }}" alt="{{ product_variant.name }}" class="w-24 h-24 rounded-lg object-cover" />
         </div>
         {% endfor %}
       </div>
     </div>
 
     <div class="bg-white p-5 rounded-lg shadow-md">
-      <h1 class="text-3xl font-bold mb-10">{{ product_variant.name }}</h1>
-      <p class="text-gray-600 mb-10">{{ product_variant.description }}</p>
+      <h1 class="text-3xl font-bold mb-6">{{ product_variant.name }}</h1>
+      <p class="text-gray-600 mb-6">{{ product_variant.description }}</p>
 
-      <div class="flex items-center mb-10">
-        <span class="text-yellow-400 text-2xl">★★★★★</span>
-        <span class="ml-2 text-gray-600">({{ product_variant.product.avg_rating }})</span>
+      <div class="flex items-center mb-6">
+        <div class="text-yellow-400 text-2xl">
+          {% with ''|center:product_variant.product.avg_rating as range %}
+            {% for _ in range %}★{% endfor %}
+          {% endwith %}
+        </div>
+        <span class="ml-2 text-gray-600">({{ product_variant.product.avg_rating|floatformat:1 }})</span>
       </div>
 
-      <p class="text-2xl font-bold mb-10">{{ product_variant.price }} руб.</p>
+      <p class="text-2xl font-bold mb-6">{{ product_variant.price }} ₽</p>
 
-      <div class="flex space-x-4">
+      <div class="flex flex-wrap gap-4 mb-6">
         <button
           onclick="addToCart({{ product_variant.id }})"
-          class="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors"
+          class="bg-black hover:bg-gray-800 text-white px-6 py-3 rounded-lg transition-colors flex items-center"
         >
-          Добавить в корзину
+          <i class="fas fa-shopping-cart mr-2"></i> Добавить в корзину
         </button>
 
-        <script>
-          function addToCart(variantId) {
-            fetch(`/shop/add-to-cart/${variantId}/`, {
-              method: 'POST',
-              headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({}),
-            })
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error('Ошибка ' + response.status);
-                }
-                return response.json();
-              })
-              .then((data) => alert(data.message))
-              .catch((error) => console.error('Ошибка:', error));
-          }
-        </script>
-
         <button
-          class="bg-yellow-400 text-black px-6 py-3 rounded-lg hover:bg-yellow-500 transition-colors"
+          class="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded-lg transition-colors flex items-center"
         >
-          Купить сейчас
+          <i class="fas fa-bolt mr-2"></i> Купить сейчас
         </button>
       </div>
 
-      <div class="mt-6">
-        <h2 class="text-xl font-semibold mb-2">Выберите вариант:</h2>
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold mb-3">Выберите вариант:</h2>
         <div class="flex flex-wrap gap-2">
           {% for variant in all_product_variants %}
           <a
             href="{% url 'product_variant_detail' variant.slug %}"
-            class="px-4 py-2 rounded-md border {% if variant == product_variant %}bg-black text-white{% else %}bg-gray-200 text-black hover:bg-gray-300{% endif %}"
+            class="px-4 py-2 rounded-md border {% if variant == product_variant %}bg-black text-white{% else %}bg-gray-100 hover:bg-gray-200 text-black{% endif %} transition-colors"
           >
             {{ variant.color.name }} / {{ variant.size }}
           </a>
@@ -126,41 +133,140 @@ RUSSKIY{% endblock %} {% block content %}
         </div>
       </div>
 
-      <div class="mt-6">
-        <h2 class="text-xl font-semibold mb-2">Детали товара</h2>
-        <ul class="text-gray-600">
-          <li>
-            <strong>Бренд:</strong>
-            <a href="{% url 'brand_detail' product_variant.brand.id %}"
-              >{{ product_variant.brand.name }}</a
-            >
+      <div class="border-t pt-4">
+        <h2 class="text-xl font-semibold mb-3">Детали товара</h2>
+        <ul class="space-y-2 text-gray-600">
+          <li class="flex">
+            <strong class="w-24">Бренд:</strong>
+            <a href="{% url 'brand_detail' product_variant.brand.id %}" class="hover:text-blue-500">
+              {{ product_variant.brand.name }}
+            </a>
           </li>
-          <li>
-            <strong>Категория:</strong>
-            <a href="{% url 'category_detail' product_variant.category.slug %}"
-              >{{ product_variant.category.name }}</a
-            >
+          <li class="flex">
+            <strong class="w-24">Категория:</strong>
+            <a href="{% url 'category_detail' product_variant.category.slug %}" class="hover:text-blue-500">
+              {{ product_variant.category.name }}
+            </a>
           </li>
-          <li><strong>Цвет:</strong> {{ product_variant.color.name }}</li>
+          <li class="flex">
+            <strong class="w-24">Цвет:</strong>
+            <span>{{ product_variant.color.name }}</span>
+          </li>
+          {% if product_variant.technical_drawing %}
+          <li class="flex">
+            <strong class="w-24">Чертеж:</strong>
+            <a href="{{ product_variant.technical_drawing.url }}" class="text-blue-500 hover:underline" download>
+              Скачать
+            </a>
+          </li>
+          {% endif %}
         </ul>
       </div>
     </div>
   </div>
 
   <div class="mt-12">
-    <h2 class="text-2xl font-bold mb-6">Отзывы</h2>
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold">Отзывы</h2>
+      {% if user.is_authenticated and user.profile.role == 'admin' %}
+      <a href="{% url 'review_create' product_variant.product.id %}" 
+         class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
+        <i class="fas fa-plus mr-2"></i>Добавить отзыв
+      </a>
+      {% endif %}
+    </div>
+
     <div class="space-y-4">
       {% for review in product_variant.product.review_set.all %}
-      <div class="bg-white p-6 rounded-lg shadow-md">
+      <div class="bg-white p-6 rounded-lg shadow-md relative">
+        {% if user.is_authenticated and user.profile.role == 'admin' %}
+        <a href="{% url 'review_delete' review.id %}" 
+           class="absolute top-4 right-4 text-red-500 hover:text-red-700"
+           onclick="return confirm('Вы уверены, что хотите удалить этот отзыв?');">
+          <i class="fas fa-trash"></i>
+        </a>
+        {% endif %}
+        
         <div class="flex items-center mb-4">
-          <span class="text-yellow-400 text-2xl">★★★★★</span>
-          <span class="ml-2 text-gray-600">{{ review.rating }}</span>
+          <div class="text-yellow-400 text-xl mr-2">
+            {% with ''|center:review.rating as range %}
+              {% for _ in range %}★{% endfor %}
+            {% endwith %}
+          </div>
+          <span class="text-gray-600">{{ review.rating }}/5</span>
         </div>
-        <p class="text-gray-600 mb-2">{{ review.description }}</p>
-        <p class="text-sm text-gray-500">— {{ review.name }}</p>
+        
+        <p class="text-gray-600 mb-3">{{ review.description }}</p>
+        
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-medium text-gray-900">— {{ review.name }}</p>
+          <p class="text-sm text-gray-500">{{ review.created_at|date:"d.m.Y" }}</p>
+        </div>
+        
+        {% if review.photo %}
+        <div class="mt-3">
+          <img src="{{ review.photo.url }}" alt="Фото отзыва" class="max-w-xs rounded-lg">
+        </div>
+        {% endif %}
+      </div>
+      {% empty %}
+      <div class="bg-white p-6 rounded-lg shadow-md text-center text-gray-500">
+        Пока нет отзывов. Будьте первым!
       </div>
       {% endfor %}
     </div>
   </div>
 </div>
+
+<script>
+  function addToCart(variantId) {
+    fetch(`/shop/add-to-cart/${variantId}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    })
+    .then(response => {
+      if (!response.ok) throw new Error('Ошибка ' + response.status);
+      return response.json();
+    })
+    .then(data => {
+      // Красивое уведомление вместо стандартного alert
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in';
+      notification.innerHTML = `
+        <div class="flex items-center">
+          <i class="fas fa-check-circle mr-2"></i>
+          <span>${data.message}</span>
+        </div>
+      `;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.classList.remove('animate-fade-in');
+        notification.classList.add('animate-fade-out');
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    })
+    .catch(error => {
+      console.error('Ошибка:', error);
+      alert('Произошла ошибка при добавлении в корзину');
+    });
+  }
+</script>
+
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-20px); }
+  }
+  .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+  .animate-fade-out { animation: fadeOut 0.3s ease-in; }
+</style>
 {% endblock %}
