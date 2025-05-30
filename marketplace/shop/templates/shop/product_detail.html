@@ -152,14 +152,6 @@
             <strong class="w-24">Цвет:</strong>
             <span>{{ product_variant.color.name }}</span>
           </li>
-          {% if product_variant.technical_drawing %}
-          <li class="flex">
-            <strong class="w-24">Чертеж:</strong>
-            <a href="{{ product_variant.technical_drawing.url }}" class="text-blue-500 hover:underline" download>
-              Скачать
-            </a>
-          </li>
-          {% endif %}
         </ul>
       </div>
     </div>

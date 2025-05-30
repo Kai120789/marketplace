@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from shop.models import Category, Product, Brand, ProductVariant
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.http import JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -16,6 +16,7 @@ from django.contrib import messages
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, login
 from django.views.decorators.http import require_POST
+from .forms import ProductForm, ReviewForm, OrderForm, ProductVariantForm
 
 
 
@@ -58,20 +59,65 @@ def brand_list(request):
     brands = Brand.objects.all()
     return render(request, 'shop/brand_list.html', {'brands': brands})
 
+from django.shortcuts import render
+from django.db.models import Count, Avg, Q
+from .models import Category, Product, Brand, Review
+
 def index(request):
-    categories = Category.objects.all()
-    products = Product.objects.all()[:4]
-    brands = Brand.objects.all()[:6]
+    total_categories = Category.objects.count()
+    total_products = Product.objects.count()
+    total_brands = Brand.objects.count()
+    
+    categories = Category.objects.annotate(
+        product_count=Count('product')
+    ).order_by('-product_count')[:12]
+    
+    popular_products = Product.objects.filter(
+        avg_rating__gt=3
+    ).order_by('-avg_rating')[:8]
+    
+    top_brands = Brand.objects.annotate(
+        product_count=Count('product')
+    ).filter(
+        product_count__gt=0
+    ).order_by('-product_count')[:6]
+    
+    average_rating = Product.objects.aggregate(
+        avg_rating=Avg('avg_rating')
+    )['avg_rating'] or 0
+    
+    products_without_reviews = Product.objects.annotate(
+        review_count=Count('review')
+    ).filter(
+        review_count=0
+    ).order_by('?')[:4]
+    
+    featured_categories = Category.objects.distinct()[:3]
+    
+    try:
+        featured_product = Product.objects.get(
+            Q(name__icontains='новинка') | Q(name__icontains='хит'),
+            avg_rating__gte=4
+        )
+    except Product.DoesNotExist:
+        featured_product = None
     
     return render(request, 'shop/index.html', {
-        'products': products,
-        'brands': brands,
+        'total_categories': total_categories,
+        'total_products': total_products,
+        'total_brands': total_brands,
         'categories': categories,
+        'popular_products': popular_products,
+        'top_brands': top_brands,
+        'average_rating': round(average_rating, 1),
+        'products_without_reviews': products_without_reviews,
+        'featured_categories': featured_categories,
+        'featured_product': featured_product,
     })
-    
+ 
 def product_detail(request, slug):
     product_variant = get_object_or_404(ProductVariant, slug=f"{slug}-{1}")
-    all_product_variants = ProductVariant.objects.filter(slug__startswith=f"{slug}-")
+    all_product_variants = ProductVariant.objects.filter(slug__startswith=f"{slug}-").select_related('color')
 
     return render(request, 'shop/product_detail.html', {
         'product_variant': product_variant,
@@ -141,7 +187,7 @@ def login_view(request):
             tokens = get_tokens_for_user(user)
 
             response = redirect("/shop/")
-            response.set_cookie("access_token", tokens["access"], httponly=True, max_age=900)  # 15 минут
+            response.set_cookie("access_token", tokens["access"], httponly=True, max_age=1500)  # 15 минут
             response.set_cookie("refresh_token", tokens["refresh"], httponly=True, max_age=604800)  # 7 дней
             return response
         else:
@@ -171,7 +217,7 @@ def add_to_cart(request, variant_id):
 
 @login_required
 def cart_view(request):
-    basket_items = Basket.objects.filter(user=request.user)
+    basket_items = Basket.objects.filter(user=request.user).select_related('product_variant', 'product_variant__product')
     total_price = sum(item.product_variant.price * item.count for item in basket_items)
     return render(request, "cart.html", {"basket_items": basket_items, "total_price": total_price})
 
@@ -187,7 +233,7 @@ def brand_detail(request, brand_id):
     return render(request, 'shop/brand_detail.html', {'brand': brand})
 
 
-from .forms import ProductForm, ReviewForm, OrderForm, ProductVariantForm
+
 
 @login_required
 def product_create(request):
@@ -198,7 +244,6 @@ def product_create(request):
             product.added_by = request.user
             product.save()  # Теперь сохраняем с дополнительными данными
             return redirect('product_detail', pk=product.pk)
-            return redirect('product_list')
     else:
         form = ProductForm()
     return render(request, 'shop/product_form.html', {'form': form})

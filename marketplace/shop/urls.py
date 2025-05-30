@@ -2,6 +2,9 @@ from django.urls import path
 from . import views
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import add_to_cart, cart_view, login_view, register, logout_view, remove_from_cart, brand_detail, product_create, product_update, product_delete, review_create, review_delete, product_variant_create, product_variant_update, product_variant_delete
+from debug_toolbar.toolbar import debug_toolbar_urls
+from django.conf import settings
+from django.urls import path, include
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -31,3 +34,9 @@ urlpatterns = [
     path('variant/<slug:slug>/edit/', views.product_variant_update, name='product_variant_update'),
     path('variant/<slug:slug>/delete/', views.product_variant_delete, name='product_variant_delete'),
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns
