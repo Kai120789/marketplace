@@ -4,7 +4,7 @@ from reportlab.pdfgen import canvas
 from io import BytesIO
 from .models import (
     UserProfile, Address, Category, Brand, Product, Color, ProductVariant, 
-    ProductColor, Review, Basket, Order, BasketOrder, ProductOrder
+    ProductColor, Review, Basket, Order, BasketOrder, ProductOrder, iuexam
 )
 
 from reportlab.pdfbase import pdfmetrics
@@ -218,3 +218,12 @@ class ProductOrderAdmin(ExportToPDFMixin, admin.ModelAdmin):
     list_display = ("product", "product_variant", "order")
     list_filter = ("order", )
     autocomplete_fields = ("product", "product_variant", "order")
+
+class iuexamAdmin(admin.ModelAdmin):
+    list_display = ('name', 'created_at', 'exam_date', 'is_public')
+    list_filter = ('is_public', 'created_at')
+    search_fields = ('name', 'users__email')
+    filter_horizontal = ('users',)
+    date_hierarchy = 'exam_date'
+
+admin.site.register(iuexam, iuexamAdmin)

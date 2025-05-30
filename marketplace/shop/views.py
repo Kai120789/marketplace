@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
 from django.views import View
-from .models import Basket, Product, Category, Brand
+from .models import Basket, Product, Category, Brand, iuexam
 from django.db.models import Q
 from django.contrib import messages
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -388,3 +388,12 @@ def product_variant_delete(request, slug):
         variant.delete()
         return redirect('product_detail', slug=product_slug)
     return render(request, 'shop/product_variant_confirm_delete.html', {'variant': variant})
+
+def iuexam_view(request):
+    exams = iuexam.objects.filter(is_public=True)
+    context = {
+        'exams': exams,
+        'fio': 'Усачев Иван Григорьевич',
+        'group': 'Группа 231-365'
+    }
+    return render(request, 'iuexam.html', context)
