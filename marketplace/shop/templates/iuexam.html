@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список экзаменов | {{ fio }}</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e1e5eb;
+        }
+        
+        .header h1 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .header .subtitle {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+        
+        .exams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        
+        .exam-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .exam-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .exam-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #e1e5eb;
+        }
+        
+        .exam-content {
+            padding: 20px;
+        }
+        
+        .exam-title {
+            font-size: 1.4rem;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+        }
+        
+        .exam-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .meta-item svg {
+            margin-right: 5px;
+            color: #6c757d;
+        }
+        
+        .users-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .user-badge {
+            background-color: #e9ecef;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-published {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-unpublished {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Список экзаменов</h1>
+            <div class="subtitle">{{ fio }} | {{ group }}</div>
+        </header>
+        
+        <div class="exams-grid">
+            {% for exam in exams %}
+            <div class="exam-card">
+                {% if exam.image %}
+                <img src="{{ exam.image.url }}" alt="Изображение задания" class="exam-image">
+                {% endif %}
+                
+                <div class="exam-content">
+                    <h2 class="exam-title">{{ exam.name }}</h2>
+                    
+                    <div class="exam-meta">
+                        <div class="meta-item">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                            </svg>
+                            <span>{{ exam.exam_date|date:"d.m.Y H:i" }}</span>
+                        </div>
+                        
+                        <div class="meta-item">
+                            <span class="status-badge {% if exam.is_public %}status-published{% else %}status-unpublished{% endif %}">
+                                {% if exam.is_public %}Опубликовано{% else %}Не опубликовано{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <strong>Дата создания:</strong> {{ exam.created_at|date:"d.m.Y H:i" }}
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <strong>Участники:</strong>
+                        <div class="users-list">
+                            {% for user in exam.users.all %}
+                            <span class="user-badge">{{ user.username }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

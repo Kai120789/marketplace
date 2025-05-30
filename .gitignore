@@ -1,3 +1,4 @@
 env
 marketplace/db.sqlite3
 marketplace/staticfiles
+media
