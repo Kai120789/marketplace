@@ -475,3 +475,18 @@ class ProductOrder(TimeStampedModel):
     class Meta:
         verbose_name = "Товар в заказе"
         verbose_name_plural = "Товары в заказах"
+
+class iuexam(models.Model):
+    name = models.CharField(max_length=255, verbose_name="Название экзамена")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания записи")
+    exam_date = models.DateTimeField(verbose_name="Дата проведения экзамена")
+    image = models.ImageField(upload_to='exam_images/', verbose_name="Изображение задания")
+    users = models.ManyToManyField(User, verbose_name="Пользователи для экзамена")
+    is_public = models.BooleanField(default=False, verbose_name="Опубликовано")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Экзамен"
+        verbose_name_plural = "Экзамены"
