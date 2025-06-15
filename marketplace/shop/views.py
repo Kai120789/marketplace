@@ -1,43 +1,103 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.core.paginator import Paginator
-from shop.models import Category, Product, Brand, ProductVariant
-from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseForbidden, JsonResponse
-from django.middleware.csrf import get_token
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.utils.decorators import method_decorator
-from django.views import View
-from .models import Basket, Product, Category, Brand
-from django.db.models import Q
+from django.db.models import Q, Count, Avg
 from django.contrib import messages
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate, login
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from .models import (
+    Category, Product, Brand, ProductVariant, Review, Basket,
+    Order, BasketOrder, ProductOrder, UserProfile, Address
+)
 from .forms import ProductForm, ReviewForm, OrderForm, ProductVariantForm
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import viewsets, status, filters
+from django_filters.rest_framework import DjangoFilterBackend
+from .serializers import (
+    ProductSerializer, CategorySerializer, BrandSerializer,
+    ProductVariantSerializer, ReviewSerializer
+)
+from simple_history.models import HistoricalRecords
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
+from import_export.fields import Field
 
+# API Views
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['category', 'brand', 'default_price']
+    search_fields = ['name', 'description']
+    ordering_fields = ['default_price', 'created_at', 'avg_rating']
+    pagination_class = Paginator
 
+    @action(detail=False, methods=['get'])
+    def discounted(self, request):
+        products = Product.objects.filter(default_price__lt=1000)
+        serializer = self.get_serializer(products, many=True)
+        return Response(serializer.data)
 
+    @action(detail=True, methods=['post'])
+    def add_to_favorites(self, request, pk=None):
+        product = self.get_object()
+        request.user.profile.favorites.add(product)
+        return Response({'status': 'added to favorites'})
 
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
+
+class BrandViewSet(viewsets.ModelViewSet):
+    queryset = Brand.objects.all()
+    serializer_class = BrandSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
+
+class ProductVariantViewSet(viewsets.ModelViewSet):
+    queryset = ProductVariant.objects.all()
+    serializer_class = ProductVariantSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['product', 'color', 'price']
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['product', 'rating']
+
+# Standard Views
 def product_list(request):
-    category_id = request.GET.get("category")
-    brand_id = request.GET.get("brand")
-    sort_by = request.GET.get("sort", "default_price")  # Сортировка по умолчанию — по цене
-
     products_list = Product.objects.all()
     
-
+    # Фильтрация
+    category_id = request.GET.get("category")
+    brand_id = request.GET.get("brand")
+    min_price = request.GET.get("min_price")
+    max_price = request.GET.get("max_price")
+    
     if category_id:
         products_list = products_list.filter(category_id=category_id)
-
     if brand_id:
         products_list = products_list.filter(brand_id=brand_id)
-
-    if sort_by in ["default_price", "-default_price", "created_at", "-created_at"]:
+    if min_price:
+        products_list = products_list.filter(default_price__gte=min_price)
+    if max_price:
+        products_list = products_list.filter(default_price__lte=max_price)
+    
+    # Сортировка
+    sort_by = request.GET.get("sort", "default_price")
+    if sort_by in ["default_price", "-default_price", "created_at", "-created_at", "avg_rating", "-avg_rating"]:
         products_list = products_list.order_by(sort_by)
-        
+    
+    # Пагинация
     paginator = Paginator(products_list, 20)
     page_number = request.GET.get('page')
     products = paginator.get_page(page_number)

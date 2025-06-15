@@ -1,10 +1,27 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 from rest_framework_simplejwt.views import TokenRefreshView
-from .views import add_to_cart, cart_view, login_view, register, logout_view, remove_from_cart, brand_detail, product_create, product_update, product_delete, review_create, review_delete, product_variant_create, product_variant_update, product_variant_delete
+from .views import (
+    add_to_cart, cart_view, login_view, register, logout_view, 
+    remove_from_cart, brand_detail, product_create, product_update, 
+    product_delete, review_create, review_delete, product_variant_create,
+    product_variant_update, product_variant_delete
+)
+from rest_framework.routers import DefaultRouter
+from .views import (
+    ProductViewSet, CategoryViewSet, BrandViewSet, 
+    ProductVariantViewSet, ReviewViewSet
+)
 from debug_toolbar.toolbar import debug_toolbar_urls
 from django.conf import settings
-from django.urls import path, include
+
+# API Router
+router = DefaultRouter()
+router.register(r'api/products', ProductViewSet)
+router.register(r'api/categories', CategoryViewSet)
+router.register(r'api/brands', BrandViewSet)
+router.register(r'api/variants', ProductVariantViewSet)
+router.register(r'api/reviews', ReviewViewSet)
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -33,6 +50,9 @@ urlpatterns = [
     path('product/<slug:product_slug>/variant/create/', views.product_variant_create, name='product_variant_create'),
     path('variant/<slug:slug>/edit/', views.product_variant_update, name='product_variant_update'),
     path('variant/<slug:slug>/delete/', views.product_variant_delete, name='product_variant_delete'),
+    
+    # API URLs
+    path('', include(router.urls)),
 ]
 
 if settings.DEBUG:
