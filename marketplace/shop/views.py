@@ -26,8 +26,20 @@ from simple_history.models import HistoricalRecords
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from import_export.fields import Field
+from django_filters import FilterSet, CharFilter, NumberFilter
 
-# API Views
+
+# Дополнительные фильтры для Product
+class ProductFilter(FilterSet):
+    min_price = NumberFilter(field_name='default_price', lookup_expr='gte')
+    max_price = NumberFilter(field_name='default_price', lookup_expr='lte')
+    category = CharFilter(field_name='category__slug')
+    brand = CharFilter(field_name='brand__slug')
+    
+    class Meta:
+        model = Product
+        fields = ['category', 'brand', 'min_price', 'max_price']
+
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -36,10 +48,26 @@ class ProductViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'description']
     ordering_fields = ['default_price', 'created_at', 'avg_rating']
     pagination_class = Paginator
+    filter_class = ProductFilter
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        user = self.request.user
+        if user.is_authenticated:
+            favorites = self.request.query_params.get('favorites', None)
+            if favorites:
+                queryset = queryset.filter(favorited_by=user.profile)
+        
+        return queryset
 
     @action(detail=False, methods=['get'])
     def discounted(self, request):
-        products = Product.objects.filter(default_price__lt=1000)
+        products = Product.objects.filter(
+            Q(default_price__lt=1000) & 
+            ~Q(category__name='Премиум') |
+            Q(brand__name__icontains='sale')
+        )
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data)
 
@@ -48,6 +76,16 @@ class ProductViewSet(viewsets.ModelViewSet):
         product = self.get_object()
         request.user.profile.favorites.add(product)
         return Response({'status': 'added to favorites'})
+
+    @action(detail=False, methods=['get'])
+    def top_rated(self, request):
+        # Еще один комплексный запрос с Q, AND и OR
+        products = Product.objects.filter(
+            Q(avg_rating__gte=4) & 
+            (Q(review_count__gte=10) | Q(featured=True))
+        ).order_by('-avg_rating')[:10]
+        serializer = self.get_serializer(products, many=True)
+        return Response(serializer.data)
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -73,6 +111,19 @@ class ReviewViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['product', 'rating']
 
+    def perform_create(self, serializer):
+        product = serializer.validated_data['product']
+        if Review.objects.filter(product=product, user=self.request.user).exists():
+            raise serializer.ValidationError("Вы уже оставляли отзыв на этот товар")
+        
+        if not Order.objects.filter(
+            user=self.request.user,
+            products__product=product
+        ).exists():
+            raise serializer.ValidationError("Вы не можете оставить отзыв, не купив товар")
+        
+        serializer.save(user=self.request.user)
+
 # Standard Views
 def product_list(request):
     products_list = Product.objects.all()
@@ -91,6 +142,19 @@ def product_list(request):
         products_list = products_list.filter(default_price__gte=min_price)
     if max_price:
         products_list = products_list.filter(default_price__lte=max_price)
+
+    search_query = request.GET.get("q")
+    if search_query:
+        products_list = products_list.filter(
+            Q(name__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(brand__name__icontains=search_query)
+        ).distinct()
+
+    if request.user.is_authenticated:
+        favorites_only = request.GET.get("favorites")
+        if favorites_only:
+            products_list = products_list.filter(favorited_by=request.user.profile)
     
     # Сортировка
     sort_by = request.GET.get("sort", "default_price")
