@@ -466,7 +466,11 @@ def search_view(request):
         products = Product.objects.filter(
             Q(name__icontains=query)
         ).values('id', 'name', 'slug', 'photo', 'default_price')[:5]
-        results['products'] = list(products)
+        # Добавляем '-1' к slug
+        product_list = list(products)
+        for product in product_list:
+            product['slug'] = f"{product['slug']}-1"
+        results['products'] = product_list
 
     return JsonResponse(results)
 
