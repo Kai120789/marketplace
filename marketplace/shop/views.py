@@ -27,6 +27,7 @@ from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from import_export.fields import Field
 from django_filters import FilterSet, CharFilter, NumberFilter
+from rest_framework.pagination import PageNumberPagination
 
 
 # Дополнительные фильтры для Product
@@ -47,7 +48,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     filterset_fields = ['category', 'brand', 'default_price']
     search_fields = ['name', 'description']
     ordering_fields = ['default_price', 'created_at', 'avg_rating']
-    pagination_class = Paginator
+    pagination_class = PageNumberPagination
     filter_class = ProductFilter
 
     def get_queryset(self):
